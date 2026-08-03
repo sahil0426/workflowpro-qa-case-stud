@@ -1,0 +1,51 @@
+name: QA Automation Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * *"   # nightly run
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tenant: [company1, company2]
+    env:
+      WFP_BASE_URL: ${{ secrets.WFP_BASE_URL }}
+      WFP_API_BASE_URL: ${{ secrets.WFP_API_BASE_URL }}
+      WFP_ADMIN_COMPANY1_EMAIL: ${{ secrets.WFP_ADMIN_COMPANY1_EMAIL }}
+      WFP_ADMIN_COMPANY1_PASSWORD: ${{ secrets.WFP_ADMIN_COMPANY1_PASSWORD }}
+      WFP_COMPANY1_ADMIN_EMAIL: ${{ secrets.WFP_COMPANY1_ADMIN_EMAIL }}
+      WFP_COMPANY1_ADMIN_PASSWORD: ${{ secrets.WFP_COMPANY1_ADMIN_PASSWORD }}
+      WFP_COMPANY2_ADMIN_EMAIL: ${{ secrets.WFP_COMPANY2_ADMIN_EMAIL }}
+      WFP_COMPANY2_ADMIN_PASSWORD: ${{ secrets.WFP_COMPANY2_ADMIN_PASSWORD }}
+      WFP_USER_COMPANY2_EMAIL: ${{ secrets.WFP_USER_COMPANY2_EMAIL }}
+      WFP_USER_COMPANY2_PASSWORD: ${{ secrets.WFP_USER_COMPANY2_PASSWORD }}
+      WFP_TEST_OTP_CODE: ${{ secrets.WFP_TEST_OTP_CODE }}
+      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps
+
+      - name: Run test suite
+        run: pytest --html=reports/report.html --self-contained-html
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.tenant }}
+          path: reports/report.html
