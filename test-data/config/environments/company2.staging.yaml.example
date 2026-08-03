@@ -1,0 +1,12 @@
+# Rename to company2.staging.local.yaml and fill in real values.
+tenant:
+  id: "company2"
+  subdomain: "company2.workflowpro.com"
+  base_url: "https://company2.workflowpro.com"
+api_base_url: "https://api.workflowpro.com"
+default_timeout_ms: 15000
+browsers: ["chromium", "firefox", "webkit"]
+test_users:
+  admin:
+    email_env: "WFP_COMPANY2_ADMIN_EMAIL"
+    password_env: "WFP_COMPANY2_ADMIN_PASSWORD"
